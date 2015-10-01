@@ -10,26 +10,35 @@ document.addEventListener("DOMContentLoaded", function() {
     clearCircle();
   });
 
+  socket.on('update-player-list', function (data) {
+    var playerList = '<li>' + data.join('</li><li>') + '</li>';
+    players.innerHTML = playerList;
+  });
+
   var circles = document.getElementById('circles');
   var initials = '';
+  var players = document.getElementById('players');
 
   circles.addEventListener('click', function(evt) {
         socket.emit('add-circle', {
         //data sent in at click
-        initials: initials,
-        x: evt.clientX,
-        y: evt.clientY,
-        dia: randomBetween(10,100),
-        rgba: getRandomRGBA()
+          initials: initials,
+          x: evt.clientX,
+          y: evt.clientY,
+          dia: randomBetween(10,100),
+          rgba: getRandomRGBA()
+        });
     });
-  });
 
   document.getElementsByTagName('button')[0].addEventListener('click', function() {
     socket.emit('clear-circle');
   });
 
-  while (initials.length < 2 || initials.length > 3) {
+  while (initials.length < 2) {
     initials = prompt("Please enter your initials").toUpperCase();
+    if (initials.length > 1 && initials.length < 4) {
+        socket.emit('register-player', {initials: initials});
+    }
   }
 
   function addCircle(data) {
